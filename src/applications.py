@@ -1,4 +1,5 @@
 import json
+from parse import parse
 
 
 from .router import Router
@@ -11,7 +12,7 @@ class App:
 
     def __call__(self, environ, start_response):
 
-        router = self.find_router(environ['PATH_INFO'])
+        router, kwargs = self.find_router(environ['PATH_INFO'])
         if not router:
             response_body, status_code = self.not_found_response()
         else:
@@ -20,7 +21,7 @@ class App:
             else:
                 request = Request(environ)
                 handler = router.handler
-                data = handler(request)
+                data = handler(request, **kwargs)
                 response_body = json.dumps(data).encode("utf-8")
                 status_code = "200"
 
@@ -40,7 +41,11 @@ class App:
         return wrapper
 
     def find_router(self, request_path: str):
-        return self.routers.get(request_path)
+        for path, router in self.routers.items():
+            parse_result = parse(path, request_path)
+            if parse_result is not None:
+                return router, parse_result.named
+        return None, None
 
     def not_found_response(self):
         return b"Not Found", "404"
