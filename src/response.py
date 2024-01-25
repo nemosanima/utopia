@@ -4,10 +4,11 @@ from typing import Any
 
 class Response:
     def __init__(
-            self,
-            body: Any = "",
-            status_code: int = 200,
-            headers: dict = None
+        self,
+        storage: dict,
+        body: Any = "",
+        status_code: int = 200,
+        headers: dict = None,
     ) -> None:
         self.headers = self._get_base_headers()
         if headers:
@@ -18,6 +19,10 @@ class Response:
             self._update_body(body)
 
         self.status_code = status_code
+        self._storage = storage
+
+    def __getattr__(self, item):
+        return self._storage.get(item)
 
     def _update_body(self, body: Any) -> None:
         self.body = json.dumps(body).encode("utf-8")

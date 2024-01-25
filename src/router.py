@@ -1,5 +1,8 @@
 from collections import namedtuple
 
-fields = ("handler", "methods",)
+fields = (
+    "handler",
+    "methods",
+)
 
 Router = namedtuple("Router", fields)
