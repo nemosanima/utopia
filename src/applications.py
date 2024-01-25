@@ -9,7 +9,7 @@ from .response import Response
 from .router import Router
 
 
-class App:
+class Utopia:
     def __init__(
             self,
             middlewares: list[BaseMiddleware] = None
