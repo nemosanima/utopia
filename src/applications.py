@@ -1,16 +1,21 @@
-import json
+from typing import Callable, Iterator
+
 from parse import parse
 
-
-from .router import Router
 from .request import Request
+from .response import Response
+from .router import Router
 
 
 class App:
-    def __init__(self):
+    def __init__(self) -> None:
         self.routers = {}
 
-    def __call__(self, environ, start_response):
+    def __call__(
+            self,
+            environ: dict,
+            start_response: Callable
+    ) -> Iterator[bytes]:
 
         router, kwargs = self.find_router(environ['PATH_INFO'])
         if not router:
@@ -21,34 +26,32 @@ class App:
             else:
                 request = Request(environ)
                 handler = router.handler
-                data = handler(request, **kwargs)
-                response_body = json.dumps(data).encode("utf-8")
-                status_code = "200"
+                response_body = handler(request, **kwargs)
+                status_code = 200
+
+        response = Response(response_body, status_code)
 
         start_response(
-            status_code,
-            [
-                ("Content-Type", "application/json; charset=utf-8"),
-                ("Content-Length", str(len(response_body)))
-            ]
+            str(response.status_code),
+            response.headers.items()
         )
-        return iter([response_body])
+        return iter([response.body])
 
-    def router(self, path: str, methods: list[str]):
+    def router(self, path: str, methods: list[str]) -> Callable:
         def wrapper(handler):
             self.routers[path] = Router(handler, methods)
             return handler
         return wrapper
 
-    def find_router(self, request_path: str):
+    def find_router(self, request_path: str) -> tuple[Router, dict] | tuple[None, None]:
         for path, router in self.routers.items():
             parse_result = parse(path, request_path)
             if parse_result is not None:
                 return router, parse_result.named
         return None, None
 
-    def not_found_response(self):
-        return b"Not Found", "404"
+    def not_found_response(self) -> tuple[str, int]:
+        return "Not Found", 404
 
-    def method_not_allowed_response(self):
-        return b"Method Not Allowed", "405"
+    def method_not_allowed_response(self) -> tuple[str, int]:
+        return "Method Not Allowed", 405
