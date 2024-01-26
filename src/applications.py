@@ -11,8 +11,8 @@ from .router import Router
 
 class Utopia:
     def __init__(
-            self,
-            middlewares: list[BaseMiddleware] = None
+        self,
+        middlewares: list[BaseMiddleware] = None
     ) -> None:
         self.routers = {}
         self.middlewares = basic_middlewares
@@ -20,8 +20,8 @@ class Utopia:
             self.middlewares = basic_middlewares.extend(middlewares)
 
     def __call__(
-            self, environ: dict,
-            start_response: Callable
+        self, environ: dict,
+        start_response: Callable
     ) -> Iterator[bytes]:
         request = Request(environ)
         router, kwargs = self.find_router(environ["PATH_INFO"])
@@ -49,8 +49,8 @@ class Utopia:
         return wrapper
 
     def find_router(
-            self,
-            request_path: str
+        self,
+        request_path: str
     ) -> tuple[Router, dict] | tuple[None, None]:
         for path, router in self.routers.items():
             parse_result = parse(path, request_path)

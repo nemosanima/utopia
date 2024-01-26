@@ -7,13 +7,13 @@ WSGI framework with routing and middleware support.
 poetry
 
 ```shell
-poetry install
+$ poetry install
 ```
 
 pip
 
 ```shell
-pip install parse gunicorn
+$ pip install parse gunicorn
 ```
 
 ## Example
